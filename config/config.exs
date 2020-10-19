@@ -2,19 +2,17 @@ use Mix.Config
 
 config :pippo, server_port: 4000
 
-config :pippo, web_hooks: [
-  {Pippo.WebHook.LarkBot, "/lark_bot", []},
-]
-
 config :pippo, producers: [
-  {Pippo.Producer.LarkBot, []}
+  {Pippo.Producer.LarkBot, %{source: "web_hook", scheme: "/lark"}}
 ]
 
-config :pippo, consumers: [
-  {Pippo.Consumer.ConsoleInspector, []},
-  {Pippo.Consumer.LarkBot, []},
-]
+config :pippo, consumers: %{
+  "lark_bot_hook" => PippoLarkBot.Test,
+  "lark_bot" => Pippo.Consumer.LarkBot,
+}
 
-config :pippo, flow: [
-  {Pippo.WebHook.LarkBot, Pippo.Consumer.ConsoleInspector},
+config :pippo, lark_bot: [
+  verification_token: "YOUR VERIFICATION_TOKEN",
+  app_id: "YOUR APP_ID",
+  app_secret: "YOUR APP_SECRET"
 ]

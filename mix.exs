@@ -5,7 +5,7 @@ defmodule PippoLarkBot.MixProject do
     [
       app: :pippo_lark_bot,
       version: "0.1.0",
-      elixir: "~> 1.8",
+      elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -21,8 +21,8 @@ defmodule PippoLarkBot.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:httpoison, "~> 1.5"},
-      {:pippo, git: "https://github.com/pippo-ex/pippo.git", branch: "dev"},
+      {:httpoison, "~> 1.7"},
+      {:pippo, git: "https://github.com/pippo-ex/pippo.git", branch: "ng"},
       {:poison, "~> 4.0"}
     ]
   end

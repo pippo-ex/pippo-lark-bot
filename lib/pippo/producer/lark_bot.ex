@@ -1,24 +1,22 @@
 defmodule Pippo.Producer.LarkBot do
-  import Pippo.Producer
-  use GenStage
+  import Plug.Conn
+  use Pippo.Utils.WebHook
+  use Pippo.Producer
 
-  def start_link do
-    GenStage.start_link(__MODULE__, :the_state_doesnt_matter, name: __MODULE__)
-  end
+  @verification_token Application.get_env(:pippo, :lark_bot)[:verification_token]
 
-  def init(_opts) do
-    {:producer, {:queue.new(), 0}, dispatcher: GenStage.BroadcastDispatcher}
-  end
-
-  def add_task({_source, event}) do
-    GenStage.cast(__MODULE__, {:add, event})
-  end
-
-  def handle_cast({:add, event}, {queue, pending_demand}) do
-    dispatch_events(:queue.in(Pippo.Utils.LarkBot.Processor.deal(event), queue), pending_demand)
-  end
-
-  def handle_demand(incoming_demand, {queue, pending_demand}) do
-    dispatch_events(queue, incoming_demand + pending_demand)
+  def call(conn) do
+    body = conn |> fetch_body
+    verification_token = @verification_token
+    case body |> Poison.decode! do
+      %{"token" => ^verification_token, "type" => "url_verification", "challenge" => challenge} ->
+        send_resp(conn, 200, Poison.encode!(%{"challenge" => challenge}))
+      %{"token" => ^verification_token, "type" => "event_callback", "event" => event} ->
+        broadcast("lark_bot_hook", event)
+        send_resp(conn, 200, "ok")
+      _ ->
+        IO.puts("unknown callback: #{body}")
+        send_resp(conn, 404, "oops")
+    end
   end
 end
